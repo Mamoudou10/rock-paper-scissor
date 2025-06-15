@@ -1,63 +1,106 @@
+// Génère le choix aléatoire de l'ordinateur
 function getComputerChoice() {
     const choices = ["rock", "paper", "scissors"];
     const randomIndex = Math.floor(Math.random() * choices.length);
     return choices[randomIndex];
 }
 
-function getHumanChoice() {
-    const userChoice = prompt("Choisissez : rock, paper ou scissors");
+// Récupère les boutons HTML
+const buttons = {
+    rock: document.getElementById('rock'),
+    paper: document.getElementById('paper'),
+    scissors: document.getElementById('scissors')
+};
 
-    // Vérifie que l'utilisateur n'a pas cliqué sur "Annuler"
-    if (userChoice === null) {
-        alert("Aucune sélection. Partie annulée.");
-        return null;
-    }
+// Zone d'affichage des résultats
+const resultsDiv = document.getElementById('results');
 
-    // Nettoie et retourne
-    return userChoice.trim();
-}
+// Zone d'affichage du score
+const scoreDiv = document.getElementById('score');
 
+// Scores des joueurs
 let humanScore = 0;
 let computerScore = 0;
 
+// Met en majuscule la première lettre d'un mot
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
+// Affiche un message dans la zone des résultats
+function showMessage(message) {
+    const p = document.createElement("p");
+    p.textContent = message;
+    resultsDiv.appendChild(p);
+}
+
+// Efface les anciens résultats
+function clearResult() {
+    resultsDiv.innerHTML = "";
+}
+
+// Met à jour dynamiquement l'affichage du score
+function updateScore() {
+    scoreDiv.textContent = `Score - You: ${humanScore}, Computer: ${computerScore}`;
+}
+
+// Désactive tous les boutons
+function disableButtons() {
+    Object.values(buttons).forEach(button => button.disabled = true);
+}
+
+// Joue un tour avec le choix du joueur et de l'ordinateur
 function playRound(humanChoice, computerChoice) {
-    // Vérification sécurité
-    if (!humanChoice) {
-        console.log("Aucun choix valide.");
-        return;
-    }
+    // Si un joueur a déjà gagné, ne rien faire
+    if (humanScore >= 5 || computerScore >= 5) return;
+
+    // Nettoie les anciens messages
+    clearResult();
+
+    // Affiche les choix
+    showMessage(`You chose: ${capitalize(humanChoice)}`);
+    showMessage(`Computer chose: ${capitalize(computerChoice)}`);
 
     humanChoice = humanChoice.toLowerCase();
     computerChoice = computerChoice.toLowerCase();
 
+    // Vérifie les résultats
     if (humanChoice === computerChoice) {
-        console.log("It's a tie!");
+        showMessage("It's a tie!");
     } else if (
         (humanChoice === 'rock' && computerChoice === 'paper') ||
         (humanChoice === 'paper' && computerChoice === 'scissors') ||
         (humanChoice === 'scissors' && computerChoice === 'rock')
     ) {
-        console.log(`You lose! ${capitalize(computerChoice)} beats ${capitalize(humanChoice)}`);
+        showMessage(`You lose! ${capitalize(computerChoice)} beats ${capitalize(humanChoice)}.`);
         computerScore++;
-    } else if (
-        (humanChoice === 'rock' && computerChoice === 'scissors') ||
-        (humanChoice === 'paper' && computerChoice === 'rock') ||
-        (humanChoice === 'scissors' && computerChoice === 'paper')
-    ) {
-        console.log(`You win! ${capitalize(humanChoice)} beats ${capitalize(computerChoice)}`);
-        humanScore++;
     } else {
-        console.log("Invalid input. Please choose rock, paper, or scissors.");
+        showMessage(`You win! ${capitalize(humanChoice)} beats ${capitalize(computerChoice)}.`);
+        humanScore++;
+    }
+
+    // Met à jour le score à l'écran
+    updateScore();
+
+    // Vérifie si la partie est terminée
+    if (humanScore >= 5 || computerScore >= 5) {
+        const winner = humanScore > computerScore
+            ? "You win the game! 🎉"
+            : "Computer wins the game! 🤖";
+        showMessage(winner);
+        disableButtons(); // Empêche de jouer après la fin
     }
 }
 
-const humanChoice = getHumanChoice();
-if (humanChoice !== null) {
-    const computerChoice = getComputerChoice();
-    playRound(humanChoice, computerChoice);
-    console.log(`Score - You: ${humanScore}, Computer: ${computerScore}`);
-}
+// Écouteurs d'événements sur les boutons
+buttons.rock.addEventListener("click", () => {
+    playRound("rock", getComputerChoice());
+});
+
+buttons.paper.addEventListener("click", () => {
+    playRound("paper", getComputerChoice());
+});
+
+buttons.scissors.addEventListener("click", () => {
+    playRound("scissors", getComputerChoice());
+});
